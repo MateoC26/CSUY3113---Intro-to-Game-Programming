@@ -1,0 +1,4 @@
+C:\Users\IIVer\Desktop\SDLProject\Debug\SDLProject.exe
+C:\Users\IIVer\Desktop\SDLProject\Debug\SDLProject.pdb
+C:\Users\IIVer\Documents\CSUY3113\Lectures\Lecture 01 - Triangles\Debug\SDLProject.exe
+C:\Users\IIVer\Documents\CSUY3113\Lectures\Lecture 01 - Triangles\Debug\SDLProject.pdb

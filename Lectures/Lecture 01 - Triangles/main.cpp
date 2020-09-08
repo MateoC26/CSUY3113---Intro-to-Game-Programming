@@ -57,7 +57,20 @@ void ProcessInput()
 	}
 }
 
-void Update() {}
+void Update()
+{
+	// 4x4 Identity Matrix
+	modelMatrix = glm::mat4(1.0f);
+
+	// Translation
+	// modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.01f, 0.0f));
+
+	// Rotation
+	// modelMatrix = glm::rotate(modelMatrix, glm::radians(1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+	// Scaling
+	// modelMatrix = glm::scale(modelMatrix, glm::vec3(1.01f, 1.01f, 1.0f));
+}
 
 void Render()
 {

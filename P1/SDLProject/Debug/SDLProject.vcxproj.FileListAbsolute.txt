@@ -1,0 +1,8 @@
+C:\Users\IIVer\Desktop\SDLProject\Debug\SDLProject.exe
+C:\Users\IIVer\Desktop\SDLProject\Debug\SDLProject.pdb
+C:\Users\IIVer\Desktop\Mateo\NYU\Junior Year\CS 3113 Lectures\SDLProject\Debug\SDLProject.exe
+C:\Users\IIVer\Desktop\Mateo\NYU\Junior Year\CS 3113 Lectures\SDLProject\Debug\SDLProject.pdb
+C:\Users\IIVer\Desktop\Mateo\NYU\Junior Year\CS 3113 Lectures & SDL Project\SDLProject\Debug\SDLProject.exe
+C:\Users\IIVer\Desktop\Mateo\NYU\Junior Year\CS 3113 Lectures & SDL Project\SDLProject\Debug\SDLProject.pdb
+C:\Users\IIVer\Documents\CSUY3113\P1\SDLProject\Debug\SDLProject.exe
+C:\Users\IIVer\Documents\CSUY3113\P1\SDLProject\Debug\SDLProject.pdb

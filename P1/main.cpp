@@ -25,7 +25,7 @@ bool gameIsRunning = true;
 ShaderProgram program;
 glm::mat4 viewMatrix, athleteMatrix, basketballMatrix, basketball2Matrix, projectionMatrix;
 
-float athlete_x = -6.0f;
+float athlete_x = -2.0f;
 float athlete_y = 0;
 
 float basketball_x = 0;
@@ -121,24 +121,23 @@ void Update()
 	float deltaTime = ticks - lastTicks;
 	lastTicks = ticks;
 
-	// Keeping track of athlete's x and y position
-	athlete_x += 2.0f * deltaTime;
-	athlete_y += 1.0f * deltaTime;
+	// Keeping track of athlete's x position
+	athlete_x += 1.5f * deltaTime;
 
 	/*
+	* Scale - Makes the athlete bigger
+	*
 	* Translate - ranslate - Moves athlete constantly right, at 2.2 units below the center. Meanwhile
 	* the if statement allows the athlete to 'teleport' from the right wall to the left wall
 	* after he goes 'into' the right wall.
-	*
-	* Scale - Makes the athlete bigger
 	*/
 	athleteMatrix = glm::mat4(1.0f);
-	athleteMatrix = glm::translate(athleteMatrix, glm::vec3(athlete_x, -2.2f, 0.0f));
-	if (athlete_x > 6.0f)
-	{
-		athlete_x *= -1.0f;
-	}
 	athleteMatrix = glm::scale(athleteMatrix, glm::vec3(3.0f, 3.0f, 1.0f));
+	athleteMatrix = glm::translate(athleteMatrix, glm::vec3(athlete_x, -0.75f, 0.0f));
+	if (athlete_x > 2.0f)
+	{
+		athlete_x = -2.0f;
+	}
 
 	// Keeping track of the first basketball's x and y positions, aswell as its rotation
 	basketball_x += basketball_x_displacement * deltaTime;
@@ -154,13 +153,22 @@ void Update()
 	*/
 	basketballMatrix = glm::mat4(1.0f);
 	basketballMatrix = glm::translate(basketballMatrix, glm::vec3(basketball_x, basketball_y, 0.0f));
-	if (basketball_x > 4.7f || basketball_x < -4.7f)
+	if (basketball_x > 4.7f)
 	{
-		basketball_x_displacement *= -1.0f;
+		basketball_x_displacement = -2.0f;
 	}
-	if (basketball_y > 3.5f || basketball_y < 0.0f)
+	else if (basketball_x < -4.7f)
 	{
-		basketball_y_displacement *= -1.0f;
+		basketball_x_displacement = 2.0f;
+	}
+
+	if (basketball_y > 3.5f)
+	{
+		basketball_y_displacement = -2.0f;
+	}
+	else if (basketball_y < 0.0f)
+	{
+		basketball_y_displacement = 2.0f;
 	}
 	basketballMatrix = glm::rotate(basketballMatrix, glm::radians(basketball_rotate), glm::vec3(0.0f, 0.0f, 1.0f));
 
@@ -178,13 +186,22 @@ void Update()
 	*/
 	basketball2Matrix = glm::mat4(1.0f);
 	basketball2Matrix = glm::translate(basketball2Matrix, glm::vec3(basketball2_x, basketball2_y, 0.0f));
-	if (basketball2_x > 4.7f || basketball2_x < -4.7f)
+	if (basketball2_x > 4.7f)
 	{
-		basketball2_x_displacement *= -1.0f;
+		basketball2_x_displacement = -2.0f;
 	}
-	if (basketball2_y > 3.5f || basketball2_y < 0.0f)
+	else if (basketball2_x < -4.7f)
 	{
-		basketball2_y_displacement *= -1.0f;
+		basketball2_x_displacement = 2.0f;
+	}
+
+	if (basketball2_y > 3.5f)
+	{
+		basketball2_y_displacement = -2.0f;
+	}
+	else if (basketball2_y < 0.0f)
+	{
+		basketball2_y_displacement = 2.0f;
 	}
 	basketball2Matrix = glm::rotate(basketball2Matrix, glm::radians(basketball2_rotate), glm::vec3(0.0f, 0.0f, 1.0f));
 }

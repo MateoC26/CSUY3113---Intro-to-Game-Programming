@@ -4,17 +4,6 @@
 */
 #define GL_SILENCE_DEPRECATION
 
-/*
-* TODO
-* Rename Collision variables in update()
-* Add score tracker on screen
-* Add instructions to start game
-* Add game over/winner text
-* 
-* Optional:
-* Randomize ball movement
-*/
-
 #ifdef _WINDOWS
 #include <GL/glew.h>
 #endif

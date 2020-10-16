@@ -102,9 +102,8 @@ void Initialize() {
     // Initialize Player
     state.player = new Entity();
     state.player->position = glm::vec3(0, 4.0f, 0);
-    state.player->movement = glm::vec3(0);
-    state.player->acceleration = glm::vec3(0, -.025f, 0);
-    state.player->speed = 0.005f;
+    state.player->acceleration = glm::vec3(0, -.015f, 0);
+    state.player->speed = 0.0025f;
     state.player->fuel = 50;
     state.player->textureID = LoadTexture("tile_0381.png");
     state.player->entityType = EntityType::PLAYER;
@@ -141,7 +140,7 @@ void Initialize() {
         }
     }
 
-    // Inside Platforms
+    // Inner Platforms
     state.platforms[22].position = glm::vec3(-2.5f, 0.75f, 0);
 
     state.platforms[23].position = glm::vec3(2.5f, 0.75f, 0);
@@ -203,45 +202,37 @@ void ProcessInput() {
 
         case SDL_KEYDOWN:
             switch (event.key.keysym.sym) {
+            // Handles descreasing fuel when pressing LEFT or RIGHT arrows
             case SDLK_LEFT:
-                if (mode == GameMode::GAME_LEVEL && state.player->fuel > 0)
+                if (mode == GameMode::GAME_LEVEL && state.player->lastCollision == EntityType::NONE && state.player->fuel > 0)
                     state.player->fuel--;
                 break;
             case SDLK_RIGHT:
-                if (mode == GameMode::GAME_LEVEL && state.player->fuel > 0)
+                if (mode == GameMode::GAME_LEVEL && state.player->lastCollision == EntityType::NONE && state.player->fuel > 0)
                     state.player->fuel--;
                 break;
+            // Handles moving between Game Modes with SPACE
             case SDLK_SPACE:
                 if(mode == GameMode::HOW_TO_PLAY)
                     mode = GameMode::GAME_LEVEL;
-                else if (mode == GameMode::GAME_LEVEL && 
-                    (state.player->lastCollision == EntityType::GOAL || state.player->lastCollision == EntityType::PLATFORM))
+                else if (mode == GameMode::GAME_LEVEL && state.player->lastCollision != EntityType::NONE)
                     mode = GameMode::GAME_OVER;
                 break;
-            case SDLK_h:
-                if (mode == GameMode::GAME_OVER)
-                {
-                    state.player->lastCollision = EntityType::NONE;
-                    state.player->textureID = LoadTexture("tile_0381.png");
-                    state.player->position = glm::vec3(0, 4.0f, 0);
-                    state.player->acceleration = glm::vec3(0, -.025f, 0);
-                    state.player->fuel = 50;
-
-                    mode = GameMode::HOW_TO_PLAY;
-                }
-                break;
+            // Handles restarting game with R
             case SDLK_r:
                 if (mode == GameMode::GAME_OVER)
                 {
-                    state.player->lastCollision = EntityType::NONE;
                     state.player->textureID = LoadTexture("tile_0381.png");
                     state.player->position = glm::vec3(0, 4.0f, 0);
-                    state.player->acceleration = glm::vec3(0, -.025f, 0);
+                    state.player->velocity = glm::vec3(0);
+                    state.player->acceleration = glm::vec3(0, -0.015, 0);
                     state.player->fuel = 50;
+                    state.player->lastCollision = EntityType::NONE;
 
                     mode = GameMode::GAME_LEVEL;
                 }
                 break;
+            // Handles exiting game with ESC
             case SDLK_ESCAPE:
                 if (mode == GameMode::GAME_OVER)
                     gameIsRunning = 0;
@@ -253,6 +244,7 @@ void ProcessInput() {
 
     const Uint8* keys = SDL_GetKeyboardState(NULL);
 
+    // Handles accelerating left and right using LEFT and RIGHT arrows
     if (keys[SDL_SCANCODE_LEFT] && mode == GameMode::GAME_LEVEL && state.player->fuel > 0) {
         state.player->acceleration.x -= state.player->speed;
     }
@@ -267,34 +259,35 @@ float accumulator = 0.0f;
 
 void Update()
 {
-    if (mode == GameMode::GAME_LEVEL)
+    float ticks = (float)SDL_GetTicks() / 1000.0f;
+    float deltaTime = ticks - lastTicks;
+    lastTicks = ticks;
+
+    deltaTime += accumulator;
+    if (deltaTime < FIXED_TIMESTEP)
     {
-        float ticks = (float)SDL_GetTicks() / 1000.0f;
-        float deltaTime = ticks - lastTicks;
-        lastTicks = ticks;
+        accumulator = deltaTime;
+        return;
+    }
 
-        deltaTime += accumulator;
-        if (deltaTime < FIXED_TIMESTEP)
+    while (deltaTime >= FIXED_TIMESTEP)
+    {
+        // Only update player when you're in Game Level and there has been no collision
+        if (mode == GameMode::GAME_LEVEL && state.player->lastCollision == EntityType::NONE)
         {
-            accumulator = deltaTime;
-            return;
-        }
-
-        while (deltaTime >= FIXED_TIMESTEP)
-        {
-            // Update. Notice it's FIXED_TIMESTEP. Not deltaTime
             state.player->Update(FIXED_TIMESTEP, state.platforms, PLATFORM_COUNT);
             state.player->Update(FIXED_TIMESTEP, state.goals, GOAL_COUNT);
-
-            deltaTime -= FIXED_TIMESTEP;
         }
 
-        accumulator = deltaTime;
+        deltaTime -= FIXED_TIMESTEP;
+    }
 
-        if (state.player->lastCollision == EntityType::GOAL)
-        {
-            state.player->textureID = LoadTexture("tile_0380.png");
-        }
+    accumulator = deltaTime;
+
+    // Updates player model when a collision occurs
+    if (state.player->lastCollision != EntityType::NONE)
+    {
+        state.player->textureID = LoadTexture("tile_0380.png"); 
     }
 }
 
@@ -356,6 +349,7 @@ void DrawText(ShaderProgram* program, GLuint fontTextureID, std::string text,
 void Render() {
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // Displays how to play
     if (mode == GameMode::HOW_TO_PLAY)
     {
         DrawText(&program, fontTextureID, "How To Play", 0.5f, -0.25f,
@@ -377,6 +371,7 @@ void Render() {
         DrawText(&program, fontTextureID, "Press SPACE to start", 0.5f, -0.25f,
             glm::vec3(-2.5f, -3.0f, 0));
     }
+    // Displays the level. Includes player, platforms, goals and outcome messages
     else if (mode == GameMode::GAME_LEVEL)
     {
         for (int i = 0; i < PLATFORM_COUNT; i++)
@@ -411,19 +406,26 @@ void Render() {
                 glm::vec3(-3.0f, 2.0f, 0));
         }
     }
+    // Display Game Over screen with options to restart or exit. Also displays credits
     else if (mode == GameMode::GAME_OVER)
     {
         DrawText(&program, fontTextureID, "Game Over", 0.5f, -0.25f,
             glm::vec3(-1.0f, 3.0f, 0));
-
-        DrawText(&program, fontTextureID, "Press H to see How To Play", 0.5f, -0.25f,
-            glm::vec3(-3.25f, 2.0f, 0));
         
         DrawText(&program, fontTextureID, "Press R to play again", 0.5f, -0.25f,
-            glm::vec3(-2.5f, 1.0f, 0));
+            glm::vec3(-2.5f, 2.0f, 0));
 
         DrawText(&program, fontTextureID, "Press ESC to exit", 0.5f, -0.25f,
-            glm::vec3(-2.0f, 0.0f, 0));
+            glm::vec3(-2.0f, 1.0f, 0));
+
+        DrawText(&program, fontTextureID, "CREDITS", 0.5f, -0.25f,
+            glm::vec3(-0.75f, -1.0f, 0));
+
+        DrawText(&program, fontTextureID, "1-Bit Platformer Pack from Kenney", 0.5f, -0.25f,
+            glm::vec3(-4.0f, -2.0f, 0));
+
+        DrawText(&program, fontTextureID, "(www.kenney.nl)", 0.5f, -0.25f,
+            glm::vec3(-1.75f, -3.0f, 0));
     }
 
     SDL_GL_SwapWindow(displayWindow);

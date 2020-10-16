@@ -1,6 +1,7 @@
 /*
-* Project 2 - Pong
-* Mateo Castro - mc7212
+* Lecture 07 - Music and Sound Effects
+* 
+* Using Pong project (put into P2 directory)
 */
 #define GL_SILENCE_DEPRECATION
 
@@ -10,6 +11,7 @@
 
 #define GL_GLEXT_PROTOTYPES 1
 #include <SDL.h>
+#include <SDL_mixer.h>
 #include <SDL_opengl.h>
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -50,6 +52,9 @@ GLuint paddleTextureID;
 GLuint ballTextureID;
 GLuint fontTextureID;
 
+Mix_Music* music;
+Mix_Chunk* bounce;
+
 GLuint LoadTexture(const char* filePath)
 {
 	int w, h, n;
@@ -75,7 +80,7 @@ GLuint LoadTexture(const char* filePath)
 
 void Initialize()
 {
-	SDL_Init(SDL_INIT_VIDEO);
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 	displayWindow = SDL_CreateWindow("Project 2 - Pong", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL);
 	SDL_GLContext context = SDL_GL_CreateContext(displayWindow);
 	SDL_GL_MakeCurrent(displayWindow, context);
@@ -87,6 +92,13 @@ void Initialize()
 	glViewport(0, 0, 640, 480);
 
 	program.Load("shaders/vertex_textured.glsl", "shaders/fragment_textured.glsl");
+
+	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
+	music = Mix_LoadMUS("dooblydoo.mp3");
+	Mix_PlayMusic(music, -1);
+	Mix_VolumeMusic(MIX_MAX_VOLUME / 4);
+
+	bounce = Mix_LoadWAV("bounce.wav");
 
 	viewMatrix = glm::mat4(1.0f);
 	leftPaddleMatrix = glm::mat4(1.0f);
@@ -265,10 +277,12 @@ void Update()
 	//Bouncing off top and bottom walls
 	if (ball_position.y + ball_radius > 3.75f)
 	{
+		Mix_PlayChannel(-1, bounce, 0);
 		ball_movement.y = -1.0f;
 	}
 	else if (ball_position.y - ball_radius < -3.75f)
 	{ 
+		Mix_PlayChannel(-1, bounce, 0);
 		ball_movement.y = 1.0f;
 	}
 
@@ -293,11 +307,13 @@ void Update()
 
 	if (xdist_left < 0 && ydist_left < 0)
 	{
+		Mix_PlayChannel(-1, bounce, 0);
 		ball_movement.x = 1.0f;
 	}
 
 	if (xdist_right < 0 && ydist_right < 0)
 	{
+		Mix_PlayChannel(-1, bounce, 0);
 		ball_movement.x = -1.0f;
 	}
 
@@ -453,6 +469,9 @@ void Render()
 
 void Shutdown()
 {
+	Mix_FreeChunk(bounce);
+	Mix_FreeMusic(music);
+
 	SDL_Quit();
 }
 

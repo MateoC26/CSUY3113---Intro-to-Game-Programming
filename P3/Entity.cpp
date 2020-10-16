@@ -81,26 +81,22 @@ void Entity::Update(float deltaTime, Entity *objects, int objectCount)
 {
     if (isActive == false) return;
 
-    if (lastCollision != EntityType::PLATFORM && lastCollision != EntityType::GOAL)
-    {
+    collidedTop = false;
+    collidedBottom = false;
+    collidedLeft = false;
+    collidedRight = false;
 
-        collidedTop = false;
-        collidedBottom = false;
-        collidedLeft = false;
-        collidedRight = false;
+    velocity.x = movement.x * speed;
+    velocity += acceleration * deltaTime;
 
-        velocity.x = movement.x * speed;
-        velocity += acceleration * deltaTime;
+    position.y += velocity.y * deltaTime;          // Move on Y
+    CheckCollisionsY(objects, objectCount);    // Fix if needed
 
-        position.y += velocity.y * deltaTime;          // Move on Y
-        CheckCollisionsY(objects, objectCount);    // Fix if needed
+    position.x += velocity.x * deltaTime;          // Move on X
+    CheckCollisionsX(objects, objectCount);    // Fix if needed
 
-        position.x += velocity.x * deltaTime;          // Move on X
-        CheckCollisionsX(objects, objectCount);    // Fix if needed
-
-        modelMatrix = glm::mat4(1.0f);
-        modelMatrix = glm::translate(modelMatrix, position);
-    }
+    modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix, position);
 }
 
 void Entity::Render(ShaderProgram* program) 

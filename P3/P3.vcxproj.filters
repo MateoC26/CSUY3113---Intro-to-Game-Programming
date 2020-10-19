@@ -46,5 +46,16 @@
     <Image Include="tile_0381.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="font.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="tile_0380.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Credits.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

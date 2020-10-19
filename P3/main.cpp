@@ -13,6 +13,7 @@
 #define GL_GLEXT_PROTOTYPES 1
 #include <SDL.h>
 #include <SDL_opengl.h>
+#include <SDL_mixer.h>
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
@@ -21,7 +22,6 @@
 #include "stb_image.h"
 
 #include "Entity.h"
-
 #include "vector"
 
 #define PLATFORM_COUNT 28
@@ -40,11 +40,16 @@ GameState state;
 
 SDL_Window* displayWindow;
 bool gameIsRunning = true;
+bool gameOver = false;
 
 ShaderProgram program;
 glm::mat4 viewMatrix, modelMatrix, projectionMatrix;
 
 GLuint fontTextureID;
+
+Mix_Music* music;
+Mix_Chunk* win;
+Mix_Chunk* lose;
 
 GLuint LoadTexture(const char* filePath) {
     int w, h, n;
@@ -80,6 +85,17 @@ void Initialize() {
     glViewport(0, 0, 640, 480);
 
     program.Load("shaders/vertex_textured.glsl", "shaders/fragment_textured.glsl");
+
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
+    music = Mix_LoadMUS("Music.mp3");
+    Mix_PlayMusic(music, -1);
+    Mix_VolumeMusic(MIX_MAX_VOLUME / 2);
+
+    win = Mix_LoadWAV("Win.wav");
+    Mix_VolumeChunk(win, MIX_MAX_VOLUME / 4);
+
+    lose = Mix_LoadWAV("Lose.wav");
+    Mix_VolumeChunk(win, MIX_MAX_VOLUME / 2);
 
     viewMatrix = glm::mat4(1.0f);
     modelMatrix = glm::mat4(1.0f);
@@ -204,18 +220,18 @@ void ProcessInput() {
             switch (event.key.keysym.sym) {
             // Handles descreasing fuel when pressing LEFT or RIGHT arrows
             case SDLK_LEFT:
-                if (mode == GameMode::GAME_LEVEL && state.player->lastCollision == EntityType::NONE && state.player->fuel > 0)
+                if (mode == GameMode::GAME_LEVEL && !gameOver && state.player->fuel > 0)
                     state.player->fuel--;
                 break;
             case SDLK_RIGHT:
-                if (mode == GameMode::GAME_LEVEL && state.player->lastCollision == EntityType::NONE && state.player->fuel > 0)
+                if (mode == GameMode::GAME_LEVEL && !gameOver && state.player->fuel > 0)
                     state.player->fuel--;
                 break;
             // Handles moving between Game Modes with SPACE
             case SDLK_SPACE:
                 if(mode == GameMode::HOW_TO_PLAY)
                     mode = GameMode::GAME_LEVEL;
-                else if (mode == GameMode::GAME_LEVEL && state.player->lastCollision != EntityType::NONE)
+                else if (mode == GameMode::GAME_LEVEL && gameOver)
                     mode = GameMode::GAME_OVER;
                 break;
             // Handles restarting game with R
@@ -229,6 +245,8 @@ void ProcessInput() {
                     state.player->fuel = 50;
                     state.player->lastCollision = EntityType::NONE;
 
+                    gameOver = false;
+                    
                     mode = GameMode::GAME_LEVEL;
                 }
                 break;
@@ -273,7 +291,7 @@ void Update()
     while (deltaTime >= FIXED_TIMESTEP)
     {
         // Only update player when you're in Game Level and there has been no collision
-        if (mode == GameMode::GAME_LEVEL && state.player->lastCollision == EntityType::NONE)
+        if (mode == GameMode::GAME_LEVEL && !gameOver)
         {
             state.player->Update(FIXED_TIMESTEP, state.platforms, PLATFORM_COUNT);
             state.player->Update(FIXED_TIMESTEP, state.goals, GOAL_COUNT);
@@ -285,9 +303,17 @@ void Update()
     accumulator = deltaTime;
 
     // Updates player model when a collision occurs
-    if (state.player->lastCollision != EntityType::NONE)
+    if (state.player->lastCollision == EntityType::GOAL && !gameOver)
     {
         state.player->textureID = LoadTexture("tile_0380.png"); 
+        Mix_PlayChannel(-1, win, 0);
+        gameOver = true;
+    }
+    else if (state.player->lastCollision == EntityType::PLATFORM && !gameOver)
+    {
+        state.player->textureID = LoadTexture("tile_0380.png");
+        Mix_PlayChannel(-1, lose, 0);
+        gameOver = true;
     }
 }
 
@@ -395,7 +421,7 @@ void Render() {
                 glm::vec3(-2.0f, 3.0f, 0));
 
             DrawText(&program, fontTextureID, "Press SPACE to continue", 0.5f, -0.25f,
-                glm::vec3(-3.0f, 2.0f, 0));
+                glm::vec3(-2.75f, 2.5f, 0));
         }
         else if (state.player->lastCollision == EntityType::PLATFORM)
         {
@@ -403,29 +429,42 @@ void Render() {
                 glm::vec3(-1.75f, 3.0f, 0));
 
             DrawText(&program, fontTextureID, "Press SPACE to continue", 0.5f, -0.25f,
-                glm::vec3(-3.0f, 2.0f, 0));
+                glm::vec3(-2.75f, 2.5f, 0));
         }
     }
     // Display Game Over screen with options to restart or exit. Also displays credits
     else if (mode == GameMode::GAME_OVER)
     {
         DrawText(&program, fontTextureID, "Game Over", 0.5f, -0.25f,
-            glm::vec3(-1.0f, 3.0f, 0));
-        
+            glm::vec3(-1.0f, 3.25f, 0));
+      
         DrawText(&program, fontTextureID, "Press R to play again", 0.5f, -0.25f,
-            glm::vec3(-2.5f, 2.0f, 0));
-
+            glm::vec3(-2.5f, 2.75f, 0));
         DrawText(&program, fontTextureID, "Press ESC to exit", 0.5f, -0.25f,
-            glm::vec3(-2.0f, 1.0f, 0));
+            glm::vec3(-2.0f, 2.25f, 0));
 
         DrawText(&program, fontTextureID, "CREDITS", 0.5f, -0.25f,
-            glm::vec3(-0.75f, -1.0f, 0));
+            glm::vec3(-0.75f, 1.5f, 0));
 
-        DrawText(&program, fontTextureID, "1-Bit Platformer Pack from Kenney", 0.5f, -0.25f,
-            glm::vec3(-4.0f, -2.0f, 0));
+        DrawText(&program, fontTextureID, "1-Bit Platformer Pack by Kenney", 0.5f, -0.25f,
+            glm::vec3(-4.0f, 1.0f, 0));
+        DrawText(&program, fontTextureID, "(kenney.nl)", 0.5f, -0.25f,
+            glm::vec3(-1.25f, 0.5f, 0));
 
-        DrawText(&program, fontTextureID, "(www.kenney.nl)", 0.5f, -0.25f,
-            glm::vec3(-1.75f, -3.0f, 0));
+        DrawText(&program, fontTextureID, "Wholesome by Kevin MacLeod", 0.5f, -0.25f,
+            glm::vec3(-3.25f, -0.25f, 0));
+        DrawText(&program, fontTextureID, "(incompetech.filmmusic.io)", 0.5f, -0.25f,
+            glm::vec3(-3.25f, -0.75f, 0));
+
+        DrawText(&program, fontTextureID, "Life Lost Game Over by noirenex", 0.5f, -0.25f,
+            glm::vec3(-3.75f, -1.5f, 0));
+        DrawText(&program, fontTextureID, "(freesound.org)", 0.5f, -0.25f,
+            glm::vec3(-1.75f, -2.0f, 0));
+
+        DrawText(&program, fontTextureID, "PigLevelWin2 by Tuudrut", 0.5f, -0.25f,
+            glm::vec3(-2.75f, -2.75f, 0));
+        DrawText(&program, fontTextureID, "(freesound.org)", 0.5f, -0.25f,
+            glm::vec3(-1.75f, -3.25f, 0));
     }
 
     SDL_GL_SwapWindow(displayWindow);

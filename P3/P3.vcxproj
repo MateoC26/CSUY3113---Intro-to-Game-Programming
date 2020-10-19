@@ -152,9 +152,14 @@
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="font.png" />
     <Image Include="tile_0070.png" />
     <Image Include="tile_0165.png" />
+    <Image Include="tile_0380.png" />
     <Image Include="tile_0381.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Credits.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

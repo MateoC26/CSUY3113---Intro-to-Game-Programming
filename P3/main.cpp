@@ -1,7 +1,7 @@
 /*
 * Project 3 - Lunar Lander
 * Mateo Castro - mc7212
-* Textures Credit: 1-Bit Platformer Pack from Kenney (www.kenney.nl)
+* For Credits see Credits.txt
 */
 
 #define GL_SILENCE_DEPRECATION

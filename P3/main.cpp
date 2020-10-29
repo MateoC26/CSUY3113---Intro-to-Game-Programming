@@ -472,6 +472,10 @@ void Render() {
 
 
 void Shutdown() {
+    Mix_FreeChunk(win);
+    Mix_FreeChunk(lose);
+    Mix_FreeMusic(music);
+
     SDL_Quit();
 }
 

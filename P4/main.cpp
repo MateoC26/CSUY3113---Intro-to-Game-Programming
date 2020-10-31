@@ -21,7 +21,8 @@
 #include "Map.h"
 #include "Scene.h"
 #include "Level1.h"
-#include "Level2.h"
+#include "LoseScreen.h"
+#include "WinScreen.h"
 
 #include <SDL_mixer.h>
 
@@ -32,7 +33,7 @@ ShaderProgram program;
 glm::mat4 viewMatrix, modelMatrix, projectionMatrix;
 
 Scene* currentScene;
-Scene* sceneList[2];
+Scene* sceneList[3];
 
 void SwitchToScene(Scene* scene) {
     currentScene = scene;
@@ -62,19 +63,20 @@ void Initialize() {
 
     glUseProgram(program.programID);
 
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    glClearColor(0, 0, 0, 1.0f);
     glEnable(GL_BLEND);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     sceneList[0] = new Level1();
-    sceneList[1] = new Level2();
+    sceneList[1] = new WinScreen();
+    sceneList[2] = new LoseScreen();
     SwitchToScene(sceneList[0]);
 }
 
 void ProcessInput() {
-
-    currentScene->state.player->movement = glm::vec3(0);
+    if(currentScene->state.player)
+        currentScene->state.player->movement = glm::vec3(0);
 
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -86,16 +88,18 @@ void ProcessInput() {
 
         case SDL_KEYDOWN:
             switch (event.key.keysym.sym) {
-            case SDLK_LEFT:
-                // Move the player left
+            case SDLK_r:
+                if (!currentScene->state.player)
+                    currentScene->state.nextScene = 0;
                 break;
 
-            case SDLK_RIGHT:
-                // Move the player right
+            case SDLK_ESCAPE:
+                if (!currentScene->state.player)
+                    gameIsRunning = 0;
                 break;
 
             case SDLK_SPACE: 
-                if (currentScene->state.player->collidedBottom)
+                if (currentScene->state.player && currentScene->state.player->collidedBottom)
                 {
                     currentScene->state.player->jump = true;
                 }
@@ -107,17 +111,17 @@ void ProcessInput() {
 
     const Uint8* keys = SDL_GetKeyboardState(NULL);
 
-    if (keys[SDL_SCANCODE_LEFT]) {
+    if (keys[SDL_SCANCODE_LEFT] && currentScene->state.player) {
         currentScene->state.player->movement.x = -1.0f;
         currentScene->state.player->animIndices = currentScene->state.player->animLeft;
     }
-    else if (keys[SDL_SCANCODE_RIGHT]) {
+    else if (keys[SDL_SCANCODE_RIGHT] && currentScene->state.player) {
         currentScene->state.player->movement.x = 1.0f;
         currentScene->state.player->animIndices = currentScene->state.player->animRight;
     }
 
 
-    if (glm::length(currentScene->state.player->movement) > 1.0f) {
+    if (currentScene->state.player && glm::length(currentScene->state.player->movement) > 1.0f) {
         currentScene->state.player->movement = glm::normalize(currentScene->state.player->movement);
     }
 
@@ -150,15 +154,15 @@ void Update()
     accumulator = deltaTime;
 
     viewMatrix = glm::mat4(1.0f);
-    if (currentScene->state.player->position.x > 5 && currentScene->state.player->position.x < 8) 
+    if (currentScene->state.player && currentScene->state.player->position.x > 5 && currentScene->state.player->position.x < 8)
     {
         viewMatrix = glm::translate(viewMatrix, glm::vec3(-currentScene->state.player->position.x, 3.75, 0));
     }
-    else if(currentScene->state.player->position.x < 5)
+    else if(currentScene->state.player && currentScene->state.player->position.x < 5)
     {
         viewMatrix = glm::translate(viewMatrix, glm::vec3(-5, 3.75, 0));
     }
-    else
+    else if(currentScene->state.player && currentScene->state.player->position.x > 8)
     {
         viewMatrix = glm::translate(viewMatrix, glm::vec3(-8, 3.75, 0));
     }

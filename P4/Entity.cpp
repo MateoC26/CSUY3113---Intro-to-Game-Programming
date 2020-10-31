@@ -43,14 +43,17 @@ void Entity::CheckCollisionsY(Entity* objects, int objectCount)
                 position.y -= penetrationY;
                 velocity.y = 0;
                 collidedTop = true;
+                object->collidedBottom = true;
             }
             else if(velocity.y < 0)
             {
                 position.y += penetrationY;
                 velocity.y = 0;
                 collidedBottom = true;
-                object->isActive = false;
+                object->collidedTop = true;
             }
+
+            lastCollision = object;
         }
     }
 }
@@ -70,12 +73,14 @@ void Entity::CheckCollisionsX(Entity* objects, int objectCount)
                 position.x -= penetrationX;
                 velocity.x = 0;
                 collidedRight = true;
+                object->collidedLeft = true;
             }
             else if (velocity.x < 0)
             {
                 position.x += penetrationX;
                 velocity.x = 0;
                 collidedLeft = true;
+                object->collidedRight = true;
             }
             
             lastCollision = object;
@@ -127,6 +132,16 @@ void Entity::CheckCollisionsY(Map* map)
         velocity.y = 0;
         collidedBottom = true;
     }
+
+    if (collidedBottom)
+    {
+        if (!map->IsSolid(bottom_left, &penetration_x, &penetration_y)) {
+            holeLeft = true;
+        }
+        if (!map->IsSolid(bottom_right, &penetration_x, &penetration_y)) {
+            holeRight = true;
+        }
+    }
 }
 
 void Entity::CheckCollisionsX(Map* map)
@@ -160,20 +175,25 @@ void Entity::AIPatroller(Map* map)
         break;
 
     case WALKING:
-        if (collidedLeft)
+        if (holeLeft)
         {
             movement = glm::vec3(1, 0, 0);
+            animIndices = animRight;
         }
         else if (collidedRight)
         {
             movement = glm::vec3(-1, 0, 0);
+            animIndices = animLeft;
         }
+        break;
+
+    case JUMPING:
         break;
 
     case ATTACKING:
             break;
 
-    case REST:
+    case RESTING:
         break;
     }
 }
@@ -193,11 +213,14 @@ void Entity::AICharger(Entity* player)
     case WALKING:
         break;
 
+    case JUMPING:
+        break;
+
     case ATTACKING:
         if (glm::distance(position, attackPosition) < 0.5f)
         {
             movement = glm::vec3(0);
-            aiState = REST;
+            aiState = RESTING;
         }
         else
         {
@@ -210,8 +233,60 @@ void Entity::AICharger(Entity* player)
                 movement = glm::vec3(1, 0, 0);
             }
         }
+        break;
 
-    case REST:
+    case RESTING:
+        break;
+    }
+}
+
+void Entity::AIJumper(Map* map)
+{
+    switch (aiState)
+    {
+    case IDLE:
+        if (movement.x == 0)
+            movement = glm::vec3(1, 0, 0);
+        
+        jumpPower = 4.0f;
+        aiState = JUMPING;
+        break;
+
+    case WALKING:
+        break;
+
+    case JUMPING:
+        if(collidedBottom)
+            jump = true;
+
+        if (holeRight && movement.x == 1)
+        {
+            speed = 1.0f;
+            aiState = IDLE;
+        }
+        else if (holeLeft && movement.x == -1)
+        {
+            speed = 1.0f;
+            jumpPower = 6.5f;
+            aiState = IDLE;
+        }
+
+        if (collidedLeft)
+        {
+            movement = glm::vec3(1, 0, 0);
+            animIndices = animRight;
+        }
+        else if (collidedRight)
+        {
+            movement = glm::vec3(-1, 0, 0);
+            animIndices = animLeft;
+        }
+        break;
+
+    case ATTACKING:
+        break;
+
+    case RESTING:
         break;
     }
 }
@@ -226,6 +301,10 @@ void Entity::AI(Entity* player, Map* map)
 
     case CHARGER:
         AICharger(player);
+        break;
+
+    case JUMPER:
+        AIJumper(map);
         break;
     }
 }
@@ -243,6 +322,8 @@ void Entity::Update(float deltaTime, Entity* player, Entity* objects, int object
     collidedBottom = false;
     collidedLeft = false;
     collidedRight = false;
+    holeLeft = false;
+    holeRight = false;
 
     if (animIndices != NULL) {
         if (glm::length(movement) != 0) {
@@ -279,6 +360,32 @@ void Entity::Update(float deltaTime, Entity* player, Entity* objects, int object
     position.x += velocity.x * deltaTime;  // Move on X
     CheckCollisionsX(map);
     CheckCollisionsX(objects, objectCount); // Fix if needed
+
+    if (entityType == PLAYER && lastCollision)
+    {
+        if (collidedBottom && lastCollision->entityType == ENEMY && lastCollision->collidedTop)
+        {
+            lastCollision->isActive = false;
+            lastCollision = NULL;
+            velocity.y += 4.0f;
+            position.y += velocity.y * deltaTime;
+        }
+        else if ((collidedLeft || collidedRight) && lastCollision->entityType == ENEMY)
+        {
+            isActive = false;
+        }
+    }
+    else if (entityType == ENEMY && lastCollision)
+    {
+         if ((collidedLeft || collidedRight) && lastCollision->entityType == PLAYER)
+         {
+            lastCollision->isActive = false;
+            lastCollision = NULL;
+         }
+    }
+
+    if (position.y < -8)
+        isActive = false;
 
     modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, position);

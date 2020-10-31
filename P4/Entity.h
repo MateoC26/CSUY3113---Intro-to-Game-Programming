@@ -15,20 +15,22 @@
 
 enum EntityType { PLAYER, PLATFORM, ENEMY };
 
-enum AIType { PATROLLER, CHARGER };
-enum AIState { IDLE, WALKING, ATTACKING, REST };
+enum AIType { PATROLLER, CHARGER, JUMPER };
+enum AIState { IDLE, WALKING, JUMPING, ATTACKING, RESTING };
 
 class Entity {
 public:
     EntityType entityType;
     AIType aiType;
     AIState aiState;
-    Entity* lastCollision;
+    Entity* lastCollision = NULL;
 
     glm::vec3 position;
     glm::vec3 movement;
     glm::vec3 acceleration;
     glm::vec3 velocity;
+
+    glm::vec3 attackPosition;
     
     float width = 1;
     float height = 1;
@@ -37,8 +39,6 @@ public:
     float jumpPower = 0;
 
     float speed;
-
-    glm::vec3 attackPosition;
 
     GLuint textureID;
 
@@ -62,6 +62,8 @@ public:
     bool collidedBottom = false;
     bool collidedLeft = false;
     bool collidedRight = false;
+    bool holeLeft = false;
+    bool holeRight = false;
 
     Entity();
 
@@ -78,4 +80,5 @@ public:
     void AI(Entity* player, Map* map);
     void AIPatroller(Map* map);
     void AICharger(Entity* player);
+    void AIJumper(Map* map);
 };

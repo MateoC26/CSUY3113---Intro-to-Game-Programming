@@ -198,7 +198,7 @@ void Entity::AIPatroller(Map* map)
     }
 }
 
-void Entity::AICharger(Entity* player)
+void Entity::AICharger(float deltaTime, Entity* player)
 {
     switch (aiState)
     {
@@ -217,25 +217,34 @@ void Entity::AICharger(Entity* player)
         break;
 
     case ATTACKING:
-        if (glm::distance(position, attackPosition) < 0.5f)
+        if (fabs(position.x - attackPosition.x) < 0.5f)
         {
             movement = glm::vec3(0);
             aiState = RESTING;
         }
         else
         {
-            if (attackPosition.x < position.x)
+            if (attackPosition.x <= position.x)
             {
                 movement = glm::vec3(-1, 0, 0);
+                animIndices = animLeft;
             }
-            else
+            else if (attackPosition.x > position.x)
             {
                 movement = glm::vec3(1, 0, 0);
+                animIndices = animRight;
             }
         }
         break;
 
     case RESTING:
+        restTimeRemaining -= deltaTime;
+        
+        if (restTimeRemaining <= 0)
+        {
+            restTimeRemaining = 2;
+            aiState = IDLE;
+        }
         break;
     }
 }
@@ -291,7 +300,7 @@ void Entity::AIJumper(Map* map)
     }
 }
 
-void Entity::AI(Entity* player, Map* map)
+void Entity::AI(float deltaTime, Entity* player, Map* map)
 {
     switch (aiType)
     {
@@ -300,7 +309,7 @@ void Entity::AI(Entity* player, Map* map)
         break;
 
     case CHARGER:
-        AICharger(player);
+        AICharger(deltaTime, player);
         break;
 
     case JUMPER:
@@ -315,7 +324,7 @@ void Entity::Update(float deltaTime, Entity* player, Entity* objects, int object
 
     if (entityType == ENEMY)
     {
-        AI(player, map);
+        AI(deltaTime, player, map);
     }
 
     collidedTop = false;

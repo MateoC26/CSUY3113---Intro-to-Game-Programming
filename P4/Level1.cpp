@@ -79,7 +79,7 @@ void Level1::Initialize() {
     state.enemies[1].entityType = ENEMY;
     state.enemies[1].position = glm::vec3(12, -4, 0);
     state.enemies[1].acceleration = glm::vec3(0, -9.81f, 0);
-    state.enemies[1].speed = 4.0f;
+    state.enemies[1].speed = 6.0f;
     state.enemies[1].textureID = Util::LoadTexture("billy.png");
 
     state.enemies[1].animRight = new int[4]{ 12, 13, 14, 15 };
@@ -133,8 +133,8 @@ void Level1::Update(float deltaTime)
         state.enemies[i].Update(deltaTime, state.player, state.player, 1, state.map);
     }
 
-    state.enemies[0].isActive = false;
-    state.enemies[2].isActive = false;
+    //state.enemies[0].isActive = false;
+    //state.enemies[2].isActive = false;
 
     if (!state.enemies[0].isActive && !state.enemies[1].isActive && !state.enemies[2].isActive)
     {

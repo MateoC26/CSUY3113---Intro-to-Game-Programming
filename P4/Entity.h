@@ -40,6 +40,8 @@ public:
 
     float speed;
 
+    float restTimeRemaining = 2;
+
     GLuint textureID;
 
     glm::mat4 modelMatrix;
@@ -77,8 +79,8 @@ public:
     void Render(ShaderProgram* program);
     void DrawSpriteFromTextureAtlas(ShaderProgram* program, GLuint textureID, int index);
 
-    void AI(Entity* player, Map* map);
+    void AI(float deltaTime, Entity* player, Map* map);
     void AIPatroller(Map* map);
-    void AICharger(Entity* player);
+    void AICharger(float deltaTime, Entity* player);
     void AIJumper(Map* map);
 };

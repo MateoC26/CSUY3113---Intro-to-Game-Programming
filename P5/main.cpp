@@ -97,7 +97,7 @@ void Initialize() {
 
 void ProcessInput() {
 
-    if(currentScene->state.player) currentScene->state.player->movement = glm::vec3(0);
+    if(currentScene->state.player && currentScene->state.player->isActive) currentScene->state.player->movement = glm::vec3(0);
 
     SDL_Event event;
     while (SDL_PollEvent(&event)) {

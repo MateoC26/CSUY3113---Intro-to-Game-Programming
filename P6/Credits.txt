@@ -1,0 +1,17 @@
+=== CREDITS ===
+
+- Music -
+
+Our Mountain V3 - Eric Matyas (https://soundimage.org/fantasywonder/)
+
+- Sound Effects -
+
+Fireball Cast - LiamG_SFX (https://freesound.org/people/LiamG_SFX/sounds/334234/)
+
+Electro Win Sound - Mativve (https://freesound.org/people/Mativve/sounds/391539/)
+
+Death Sound (Male) - Replix (https://freesound.org/people/Replix/sounds/173126/)
+
+- Textures - 
+
+Micro Roguelike - Kenney (https://www.kenney.nl/assets/micro-roguelike)

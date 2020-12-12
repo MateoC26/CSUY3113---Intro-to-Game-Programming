@@ -1,3 +1,2 @@
-﻿  MainMenu.cpp
-D:\CSUY3113\P5\MainMenu.cpp(31,118): warning C4305: 'argument': truncation from 'double' to 'float'
+﻿  Level1.cpp
   P5.vcxproj -> D:\CSUY3113\P5\Debug\P5.exe

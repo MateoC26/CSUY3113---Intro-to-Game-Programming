@@ -94,5 +94,8 @@
     <Text Include="Credits.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="How To Play.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

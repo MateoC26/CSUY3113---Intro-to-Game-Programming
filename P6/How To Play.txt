@@ -1,0 +1,7 @@
+=== How To Play ===
+
+Move - WASD
+
+Shoot- Arrow Keys
+
+Keys - Open Chests and Doors/Gates

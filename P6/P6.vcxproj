@@ -171,6 +171,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Credits.txt" />
+    <Text Include="How To Play.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

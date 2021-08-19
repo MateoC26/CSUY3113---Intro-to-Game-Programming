@@ -1,1 +1,1 @@
-# CSUY3113
+# CSUY3113 - Intro To Game Programming

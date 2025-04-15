@@ -119,7 +119,7 @@ void Initialize() {
     state.player = new Entity();
     state.player->position = glm::vec3(0, 4.0f, 0);
     state.player->acceleration = glm::vec3(0, -.015f, 0);
-    state.player->speed = 0.0025f;
+    state.player->speed = 0.05f;
     state.player->fuel = 50;
     state.player->textureID = LoadTexture("tile_0381.png");
     state.player->entityType = EntityType::PLAYER;

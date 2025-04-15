@@ -1,7 +1,5 @@
 /*
-* Lecture 07 - Music and Sound Effects
-* 
-* Using Pong project (put into P2 directory)
+* Project 2 - Pong
 */
 #define GL_SILENCE_DEPRECATION
 

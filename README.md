@@ -13,3 +13,6 @@ Project 4 - Rise of the AIs (Tests NPC AI)
 Project 5 - Snowy Mountain Climb (Platformer)
 
 Project 6 - Dungeon Delver
+
+
+See the Setup Instructions PDF for Setup.
